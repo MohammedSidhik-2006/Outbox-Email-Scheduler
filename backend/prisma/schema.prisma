@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String         @id @default(uuid())
+  email     String         @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  accounts  OAuthAccount[]
+  senders   Sender[]
+}
+
+model OAuthAccount {
+  id          String   @id @default(uuid())
+  userId      String
+  provider    String
+  providerId  String
+  accessToken String?
+  teamName    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@unique([userId, provider])
+}
+
+model Sender {
+  id              String          @id @default(uuid())
+  userId          String
+  email           String          @unique
+  name            String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  campaigns       Campaign[]
+  emailDeliveries EmailDelivery[]
+  user            User            @relation(fields: [userId], references: [id])
+}
+
+model Campaign {
+  id                 String          @id @default(uuid())
+  senderId           String
+  subject            String
+  body               String
+  startAt            DateTime
+  delayBetweenEmails Int?
+  hourlyLimit        Int?
+  status             CampaignStatus  @default(DRAFT)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  sender             Sender          @relation(fields: [senderId], references: [id])
+  emailDeliveries    EmailDelivery[]
+}
+
+model EmailDelivery {
+  id                String         @id @default(uuid())
+  campaignId        String
+  senderId          String
+  recipient         String
+  scheduledAt       DateTime
+  status            DeliveryStatus @default(SCHEDULED)
+  attempts          Int            @default(0)
+  sentAt            DateTime?
+  failedAt          DateTime?
+  lastError         String?
+  providerMessageId String?
+  idempotencyKey    String?        @unique
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  campaign          Campaign       @relation(fields: [campaignId], references: [id])
+  sender            Sender         @relation(fields: [senderId], references: [id])
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum DeliveryStatus {
+  SCHEDULED
+  QUEUED
+  PROCESSING
+  SENT
+  FAILED
+  DEFERRED
+}
