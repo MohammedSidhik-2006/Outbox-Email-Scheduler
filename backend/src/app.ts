@@ -36,13 +36,15 @@ app.use(
   session({
     store: redisStore,
     secret: env.SESSION_SECRET || 'fallback-secret-for-tests',
-    resave: false, // required: force lightweight session keep alive (connect-redis defaults to false)
-    saveUninitialized: false, // recommended: only save session when data exists
+    resave: false,
+    saveUninitialized: false,
+    name: 'connect.sid',
     cookie: {
       secure: env.NODE_ENV === 'production',
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-      sameSite: 'lax', // Lax works best for OAuth redirects
+      sameSite: 'lax', // Required for OAuth redirects to Google and back
+      domain: undefined, // Let browser handle domain
     },
   })
 );

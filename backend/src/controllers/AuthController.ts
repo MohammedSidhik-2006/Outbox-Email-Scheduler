@@ -10,28 +10,23 @@ export class AuthController {
       const state = crypto.randomBytes(32).toString('hex');
       req.session.oauthState = state;
       
+      logger.info({ 
+        event: 'AUTH_GOOGLE_START', 
+        sessionId: req.sessionID,
+        stateSaved: !!req.session.oauthState
+      }, 'Starting Google OAuth flow');
+      
       const url = AuthService.getGoogleAuthUrl(state);
-      logger.info({ event: 'AUTH_GOOGLE_START', sessionId: req.sessionID }, 'Starting Google OAuth');
       
-      // Need to save session before redirect to persist state
-      const savePromise = new Promise<void>((resolve, reject) => {
-        const timeoutId = setTimeout(() => reject(new Error('Session save timeout')), 5000);
-        req.session.save((err) => {
-          clearTimeout(timeoutId);
-          if (err) reject(err);
-          else resolve();
-        });
+      // Save session explicitly before redirecting
+      req.session.save((err) => {
+        if (err) {
+          logger.error({ err }, 'Failed to save session, but redirecting anyway');
+        }
+        res.redirect(url);
       });
-      
-      try {
-        await savePromise;
-        res.redirect(url);
-      } catch (saveErr) {
-        logger.warn({ err: saveErr }, 'Session save failed, redirecting anyway');
-        res.redirect(url);
-      }
     } catch (error) {
-      logger.error({ err: error }, 'Google Auth failed');
+      logger.error({ err: error }, 'Google Auth init failed');
       res.status(500).json({ error: 'Internal server error' });
     }
   }
