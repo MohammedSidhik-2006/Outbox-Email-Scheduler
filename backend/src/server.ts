@@ -12,10 +12,34 @@ async function startServer() {
     await prisma.$connect();
     logger.info('Connected to PostgreSQL');
 
+    // Wait for Redis connection to be ready
     if (redis.status !== 'ready') {
       logger.info('Waiting for Redis...');
-      // It connects asynchronously, but we trust it or it will crash later
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Redis connection timeout after 10s'));
+        }, 10000);
+        
+        const onReady = () => {
+          clearTimeout(timeout);
+          redis.removeListener('ready', onReady);
+          redis.removeListener('error', onError);
+          resolve(undefined);
+        };
+        
+        const onError = (err: any) => {
+          clearTimeout(timeout);
+          redis.removeListener('ready', onReady);
+          redis.removeListener('error', onError);
+          reject(err);
+        };
+        
+        redis.on('ready', onReady);
+        redis.on('error', onError);
+      });
     }
+
+    logger.info('Connected to Redis');
 
     // Queue Reconciliation
     await QueueService.reconcileQueue();
