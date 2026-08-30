@@ -32,7 +32,7 @@ export class SlackIntegrationService {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as any;
       
       if (!data.ok) {
         throw new Error(`Slack OAuth error: ${data.error}`);
@@ -145,7 +145,7 @@ export class SlackIntegrationService {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       if (!data.ok) {
         throw new Error(`Slack API error: ${data.error}`);
