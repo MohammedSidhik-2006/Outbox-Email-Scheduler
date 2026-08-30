@@ -2,7 +2,8 @@ import { z } from 'zod';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load .env
+// Load .env - In production (Render), environment variables are set via the platform
+// This will gracefully fail if .env doesn't exist (which is expected in production)
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') }); // assuming .env is at root d:\emailSender\.env
 
 const envSchema = z.object({

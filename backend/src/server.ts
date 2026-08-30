@@ -22,15 +22,15 @@ async function startServer() {
         
         const onReady = () => {
           clearTimeout(timeout);
-          redis.removeListener('ready', onReady);
-          redis.removeListener('error', onError);
+          redis.off('ready', onReady);
+          redis.off('error', onError);
           resolve(undefined);
         };
         
         const onError = (err: any) => {
           clearTimeout(timeout);
-          redis.removeListener('ready', onReady);
-          redis.removeListener('error', onError);
+          redis.off('ready', onReady);
+          redis.off('error', onError);
           reject(err);
         };
         

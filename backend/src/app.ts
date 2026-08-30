@@ -49,6 +49,23 @@ app.use(
   })
 );
 
+// Root route
+app.get('/', (req: Request, res: Response) => {
+  res.json({ 
+    message: 'Email Scheduler API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      auth: '/api/auth',
+      senders: '/api/senders',
+      slack: '/api/integrations/slack',
+      emails: '/api/emails',
+      admin: '/admin/queues'
+    }
+  });
+});
+
 // Health check
 app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', environment: env.NODE_ENV });
