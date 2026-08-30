@@ -2,6 +2,19 @@
 
 A full-stack email scheduling platform. Send scheduled emails, track delivery, with rate limiting and persistence across restarts. Built with Express, React, PostgreSQL, Redis, and BullMQ.
 
+---
+
+## 🚀 Production Deployment
+
+**Live Demo Available Now:**
+
+- **Backend API:** https://outbox-email-scheduler-wl9y.onrender.com/
+- **Frontend App:** https://emailscheduler-3ja3rfexv-professional7.vercel.app/login
+
+Try it now: [Open Live Demo](https://emailscheduler-3ja3rfexv-professional7.vercel.app/login)
+
+---
+
 ## Features
 
 ### Backend
