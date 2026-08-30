@@ -2,10 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import session from 'express-session';
+import type { Store } from 'express-session';
 import RedisStore from 'connect-redis';
 import { emailRoutes } from './routes/emailRoutes';
 import { authRoutes } from './routes/authRoutes';
 import { slackRoutes } from './routes/slackRoutes';
+import { sendersRoutes } from './routes/sendersRoutes';
 import { env } from './config/env';
 import { redis } from './lib/redis';
 import { createBullBoard } from '@bull-board/api';
@@ -26,8 +28,7 @@ app.use(cors({
 app.use(express.json());
 
 // Session Middleware
-const StoreClass = typeof RedisStore === 'function' ? RedisStore : ((RedisStore as any).default || (RedisStore as any).RedisStore);
-const redisStore = new StoreClass({
+const redisStore = new RedisStore({
   client: redis,
   prefix: 'session:',
 });
@@ -42,9 +43,8 @@ app.use(
     cookie: {
       secure: env.NODE_ENV === 'production',
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week in milliseconds
       sameSite: 'lax', // Required for OAuth redirects to Google and back
-      domain: undefined, // Let browser handle domain
     },
   })
 );
@@ -56,6 +56,7 @@ app.get('/health', (req: Request, res: Response) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/senders', sendersRoutes);
 app.use('/api/integrations/slack', slackRoutes);
 app.use('/api/emails', emailRoutes);
 

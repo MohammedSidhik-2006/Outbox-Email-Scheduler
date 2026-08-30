@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
 import { AuthService } from '../services/AuthService';
+import { prisma } from '../lib/prisma';
 import { logger } from '../lib/logger';
 import { env } from '../config/env';
 
@@ -18,10 +19,11 @@ export class AuthController {
       
       const url = AuthService.getGoogleAuthUrl(state);
       
-      // Save session explicitly before redirecting
+      // Explicitly save session before redirecting
       req.session.save((err) => {
         if (err) {
-          logger.error({ err }, 'Failed to save session, but redirecting anyway');
+          logger.error({ err }, 'Failed to save session');
+          return res.status(500).send('Session save failed');
         }
         res.redirect(url);
       });
@@ -93,12 +95,23 @@ export class AuthController {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    // Check if user has Slack integration
+    const slackAccount = await prisma.oAuthAccount.findUnique({
+      where: {
+        provider_providerId: {
+          provider: 'slack',
+          providerId: req.user.id
+        }
+      }
+    });
+
     res.json({
       user: {
         id: req.user.id,
         email: req.user.email,
         name: req.user.name,
         avatarUrl: req.user.avatarUrl,
+        slackConnected: !!slackAccount
       }
     });
   }

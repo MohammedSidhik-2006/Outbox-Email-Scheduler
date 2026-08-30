@@ -56,7 +56,7 @@ model Campaign {
   status             CampaignStatus  @default(DRAFT)
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
-  sender             Sender          @relation(fields: [senderId], references: [id])
+  sender             Sender          @relation(fields: [senderId], references: [id], onDelete: Cascade)
   emailDeliveries    EmailDelivery[]
 }
 
@@ -75,8 +75,8 @@ model EmailDelivery {
   idempotencyKey    String?        @unique
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
-  campaign          Campaign       @relation(fields: [campaignId], references: [id])
-  sender            Sender         @relation(fields: [senderId], references: [id])
+  campaign          Campaign       @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sender            Sender         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 }
 
 enum CampaignStatus {

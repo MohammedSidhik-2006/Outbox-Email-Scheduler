@@ -9,8 +9,11 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="inline-flex flex-col items-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 border-t-blue-500 mb-4"></div>
+          <p className="text-gray-600 text-sm font-medium">Loading application...</p>
+        </div>
       </div>
     );
   }
